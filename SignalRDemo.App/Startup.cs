@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace SignalRDemo.App
 {
+    using SignalRDemo.App.Hubs;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -27,6 +29,8 @@ namespace SignalRDemo.App
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,13 +57,16 @@ namespace SignalRDemo.App
                     template: "{controller}/{action=Index}/{id?}");
             });
 
+            app.UseSignalR(options => { options.MapHub<ChatHub>("/chat"); });
+
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";
 
                 if (env.IsDevelopment())
                 {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000/");
+                    //spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
         }
